@@ -1,48 +1,64 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { asyncThunkCreator, buildCreateSlice } from "@reduxjs/toolkit"
 import { DataType, StateType } from "../../types/dataType"
 
-const data: DataType = {
-  poster: "",
-  title: "",
-  year: "",
-  type: "",
-  imdbID: "",
-}
 
 const initialState: StateType = {
-  data: [],
+  data: null,
   loading: false,
   error: null,
 }
 
-export const searchSlice = createSlice({
-  name: "search",
-  initialState: initialState,
-//   selectors: {
-
-//   }
-  reducers: {
-    search: (state, action) => {
-      const data  = action.payload
-      console.info(data);
-      
-
-      state.data = data;
-    },
-    favorite: (state, action) => {
-      state
-    },
-    delete: (state, action) => {
-      state
-    },
-  },
+// хелпер
+const createSliceWithThunk = buildCreateSlice({
+  creators: { asyncThunk: asyncThunkCreator },
 })
 
-export const { search, favorite } = searchSlice.actions
+export const filmsSlice = createSliceWithThunk({
+  name: "films",
+  initialState,
+  selectors: {
+    filmsState: state => state,
+    filmsList: state => state.data,
+  },
+  reducers: create => ({
+    removeFilmFavorite: create.reducer((state, action) => {
+      console.info(state.data)
+      state.data
+      // state.data = state.data.filter((film) => {}
+    }),
+    fetchFilms: create.asyncThunk(
+      async (title, { rejectWithValue }) => {
+        try {
+          const response = await fetch(
+            `https://www.omdbapi.com/?apikey=bcc8b383&plot=full&s=${title}`,
+          )
+          if (!response.ok) {
+            return rejectWithValue("Loading is error")
+          }
+          return await response.json()
+        } catch (e) {
+          return rejectWithValue(e)
+        }
+      },
+      {
+        pending: state => {
+          state.loading = true
+          state.error = null
+        },
+        fulfilled: (state, action) => {
+          state.data = action.payload
+          state.error = null
+        },
+        rejected: (state, action) => {
+          state.error = action.payload
+        },
+        settled: state => {
+          state.loading = false
+        },
+      },
+    ),
+  }),
+})
 
-// export filmsFetch = createAsyncThunk<FilmsFetch>(
-//     "search/filmsFetch",
-//     async (_, [isRejectedWithValue]) => {
-        
-//     }
-// )
+export const { fetchFilms } = filmsSlice.actions
+export const { filmsState, filmsList } = filmsSlice.selectors
