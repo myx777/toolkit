@@ -1,33 +1,43 @@
-import { useState } from "react"
-
-import { useDispatch, useSelector } from "react-redux"
+import { useState } from "react";
 import { fetchFilms } from "./searchSlice";
+import { useAppDispatch } from "../../redux/hooks";
 
-const SearchInput = () => {
-  const [film, setFilm] = useState([]);
+/**
+ * Компонент для ввода запроса поиска фильмов.
+ * 
+ * @returns {JSX.Element} Форма для ввода запроса поиска фильмов.
+ */
+const SearchInput = (): JSX.Element => {
+  const [film, setFilm] = useState<string>("");
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch();
 
-
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    dispatch(fetchFilms(film));
-  }
+  /**
+   * Обработчик отправки формы поиска.
+   * 
+   * @param {React.FormEvent<HTMLFormElement>} e - Событие отправки формы.
+   */
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (film.trim() !== "") {
+      dispatch(fetchFilms(film));
+    }
+  };
 
   return (
     <div className="search__container">
       <form action="" onSubmit={handleSubmit}>
-        <label htmlFor="input_serach_id"></label>
+        <label htmlFor="input_search_id">Search:</label>
         <input
           type="text"
-          name=""
-          id="input_serach_id"
-          onChange={value => setFilm(value.target.value)}
+          id="input_search_id"
+          value={film}
+          onChange={(event) => setFilm(event.target.value)}
         />
-        <button className="search__button">Поиск</button>
+        <button type="submit" className="search__button">Поиск</button>
       </form>
     </div>
-  )
-}
-export default SearchInput
+  );
+};
+
+export default SearchInput;

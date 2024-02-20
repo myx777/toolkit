@@ -1,65 +1,82 @@
-import { useDispatch, useSelector } from "react-redux"
-import { filmsList, filmsState } from "../search_input/searchSlice"
-import { useAppSelector } from "../../redux/hooks"
-import { useState } from "react"
+import { filmsState } from "../search_input/searchSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useState } from "react";
+import "./listView.css";
+import SearchInput from "../search_input/SearchInput";
+import { addFilmFavorite, removeFilmFavorite } from "../favorite/favoriteSlice";
+import type { Search } from "../../types/dataType";
 
+/**
+ * Отображает представление для списка фильмов и позволяет пользователям отмечать фильмы как избранные.
+ *
+ * @component
+ * @return {JSX.Element}
+ */
 const ListsView = () => {
-  // const films = useAppSelector(filmsList);
-  const [favorites, setFavorites] = useState([])
-  const state = useAppSelector(filmsState)
-  const { data, loading, error } = state
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  console.info(state)
-  console.info(data)
+  const state = useAppSelector(filmsState);
+  const dispatch = useAppDispatch();
 
-  const toggleFavorite = imdbID => {
-    if (favorites.includes(imdbID)) {
-      setFavorites(favorites.filter(id => id !== imdbID))
+  const { data, loading, error } = state;
+
+  /**
+   * Переключает статус фильма как избранного.
+   *
+   * @param {Search} film - Объект фильма, который будет отмечен как избранный.
+   * @return {void}
+   */
+  const toggleFavorite = (film: Search): void => {
+    if (favorites.includes(film.imdbID)) {
+      setFavorites(favorites.filter(id => id !== film.imdbID));
+      dispatch(removeFilmFavorite(film.imdbID));
     } else {
-      setFavorites([...favorites, imdbID])
+      setFavorites([...favorites, film.imdbID]);
+      dispatch(addFilmFavorite(film));
     }
-  }
-
-  const dispatch = useDispatch()
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   }
-  if (data.Response === "False") {
-    return <div>Error: {data.Error}</div>
+
+  if (data !== null && data.Response === "False") {
+    return <div>Error: {data.Error}</div>;
   }
 
   return (
     <div>
-      {data.Search && (
-        <ul>
+      <SearchInput />
+      {data !== null && data.Search && (
+        <ul className="list-group">
           {data.Search.map(film => (
-            <li key={film.imdbID}>
+            <li className="list-group-item" key={film.imdbID}>
               <span
-                onClick={() => toggleFavorite(film.imdbID)}
+                className="favorite__film"
+                onClick={() => toggleFavorite(film)}
                 style={{
-                  color: favorites.includes(film.imdbID) ? "yellow" : "transparent",
+                  color: favorites.includes(film.imdbID) ? "yellow" : "white",
                   cursor: "pointer",
                 }}
               >
                 &#9733;
               </span>
-              <img src={film.Poster} alt="" />
+              <img src={film.Poster} alt={film.Poster} />
               <div>
-                <div>{film.Title}</div>
-                <div>{film.Year}</div>
-                <div>{film.Type}</div>
+                <div>Название:{film.Title}</div>
+                <div>Год: {film.Year}</div>
+                <div>Тип: {film.Type}</div>
               </div>
             </li>
           ))}
         </ul>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ListsView
+export default ListsView;

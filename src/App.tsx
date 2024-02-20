@@ -1,17 +1,16 @@
 import "./App.css"
-import ListsView from "./companents/listsView/ListsView"
-import SearchInput from "./companents/search_input/SearchInput"
+import Generally from "./companents/Generally"
+import HeaderNav from "./companents/HeaderNav/HeaderNav"
 
 const App = () => {
   return (
     <div className="page__container">
       <header className="page__header">
-        <SearchInput />
+        <HeaderNav />
       </header>
       <main className="page__main">
-        <ListsView />
+        <Generally />
       </main>
-      <footer className="page__footer"></footer>
     </div>
   )
 }

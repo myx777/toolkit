@@ -1,7 +1,15 @@
 import { asyncThunkCreator, buildCreateSlice } from "@reduxjs/toolkit"
-import { DataType, StateType } from "../../types/dataType"
+import type { StateType } from "../../types/dataType"
 
+/**
+ * @typedef {Object} Film
+ * @property {string} Title - Название фильма.
+ * @property {string} Year - Год выпуска фильма.
+ * @property {string} imdbID - IMDb ID фильма.
+ * @property {string} Type - Тип фильма (например, фильм, сериал).
+ */
 
+/** @type {StateType} */
 const initialState: StateType = {
   data: null,
   loading: false,
@@ -13,6 +21,10 @@ const createSliceWithThunk = buildCreateSlice({
   creators: { asyncThunk: asyncThunkCreator },
 })
 
+/**
+ * Срез для управления данными о фильмах.
+ * @type {ReturnType<typeof createSliceWithThunk>}
+ */
 export const filmsSlice = createSliceWithThunk({
   name: "films",
   initialState,
@@ -21,13 +33,12 @@ export const filmsSlice = createSliceWithThunk({
     filmsList: state => state.data,
   },
   reducers: create => ({
-    removeFilmFavorite: create.reducer((state, action) => {
-      console.info(state.data)
-      state.data
-      // state.data = state.data.filter((film) => {}
-    }),
+    /**
+     * Thunk-действие для получения списка фильмов.
+     * @type {AsyncThunk<Film[], string, {}>}
+     */
     fetchFilms: create.asyncThunk(
-      async (title, { rejectWithValue }) => {
+      async (title: string, { rejectWithValue }) => {
         try {
           const response = await fetch(
             `https://www.omdbapi.com/?apikey=bcc8b383&plot=full&s=${title}`,
@@ -50,7 +61,7 @@ export const filmsSlice = createSliceWithThunk({
           state.error = null
         },
         rejected: (state, action) => {
-          state.error = action.payload
+          state.error = action.payload as Error
         },
         settled: state => {
           state.loading = false

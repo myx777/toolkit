@@ -1,0 +1,16 @@
+.list-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 0; /* Убираем отступы */
+}
+
+.list-group-item {
+    margin: 10px; /* Добавляем небольшой отступ между элементами */
+    list-style-type: none; /* Убираем маркеры */
+}
+
+.favorite__film {
+    position: absolute;
+    font-size: 40px;
+}
